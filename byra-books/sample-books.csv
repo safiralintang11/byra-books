@@ -1,0 +1,4 @@
+judul,penulis,penerbit,isbn,halaman,sinopsis,kategori,stok,harga,harga_diskon,tahun,berat,bahasa,cover_url,format,asal,status,shopee_url,tutup_po
+Contoh Novel Lokal,Penulis A,Penerbit X,9786020000001,320,"Sinopsis singkat, contoh.",Novel,10,89000,79000,2024,350,Indonesia,,Paperback,lokal,ready,,
+Contoh Buku Impor,Author B,Publisher Y,9781234567897,400,Short synopsis,Fantasy,5,185000,,2023,500,Inggris,,Hardcover,impor,ready,,
+Contoh Pre-Order,Penulis C,,9786020000003,,,Non-Fiksi,0,120000,,,,,,Paperback,impor,preorder,,2026-12-31
