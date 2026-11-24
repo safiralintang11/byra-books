@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { tanggal } from '@/lib/format';
+import { IconPlus, IconTag } from '@/components/Icons';
 
 const EMPTY = { title: '', description: '', kind: 'PO', starts_on: '', ends_on: '', banner_url: '', is_active: true };
 
@@ -33,20 +34,45 @@ export default function AdminEvent() {
 
   return (
     <>
-      <div className="row between"><h1>Event &amp; PO</h1><button className="btn" onClick={() => setEdit({ ...EMPTY })}>+ Tambah</button></div>
+      <div className="row between" style={{ marginBottom: 4 }}>
+        <div>
+          <h1>Event &amp; PO</h1>
+          <p className="muted" style={{ margin: 0 }}>{list.length} event terdaftar.</p>
+        </div>
+        <button className="btn" onClick={() => setEdit({ ...EMPTY })}>
+          <IconPlus width={17} height={17} /> Tambah event
+        </button>
+      </div>
       <p className="muted">Setelah dibuat, pilih event ini pada tiap buku (menu Buku → Edit) agar muncul di filter event.</p>
+
       <div className="grid grid-2">
         {list.map((ev) => (
-          <div className="card event-card" key={ev.id} style={{ opacity: ev.is_active ? 1 : 0.5 }}>
-            <span className="badge b-po">{ev.kind}</span>
-            <h3 style={{ margin: '6px 0' }}>{ev.title}</h3>
-            <div className="muted">{tanggal(ev.starts_on)} {ev.ends_on && `– ${tanggal(ev.ends_on)}`}</div>
-            <p>{ev.description}</p>
-            <button className="btn btn-ghost btn-sm" onClick={() => setEdit({ ...EMPTY, ...Object.fromEntries(Object.entries(ev).map(([k, v]) => [k, v ?? ''])) })}>Edit</button>{' '}
-            <button className="btn btn-danger btn-sm" onClick={() => hapus(ev)}>Hapus</button>
+          <div className="card event-card" key={ev.id} style={{ opacity: ev.is_active ? 1 : 0.55 }}>
+            <div className="row between">
+              <span className="badge b-po">{ev.kind}</span>
+              <span className={`status ${ev.is_active ? 'st-selesai' : 'st-dibatalkan'}`}>{ev.is_active ? 'Aktif' : 'Nonaktif'}</span>
+            </div>
+            <h3>{ev.title}</h3>
+            <div className="muted" style={{ fontSize: '.8rem', fontWeight: 700 }}>
+              {tanggal(ev.starts_on)} {ev.ends_on && `– ${tanggal(ev.ends_on)}`}
+            </div>
+            <p style={{ color: 'var(--steel)', fontSize: '.88rem' }}>{ev.description}</p>
+            <div className="row" style={{ marginTop: 'auto' }}>
+              <button className="btn btn-ghost btn-sm" onClick={() => setEdit({ ...EMPTY, ...Object.fromEntries(Object.entries(ev).map(([k, v]) => [k, v ?? ''])) })}>Edit</button>
+              <button className="btn btn-danger btn-sm" onClick={() => hapus(ev)}>Hapus</button>
+            </div>
           </div>
         ))}
+        {list.length === 0 && (
+          <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 34 }}>
+            <span className="stat-icon" style={{ margin: '0 auto 12px' }}><IconTag width={20} height={20} /></span>
+            <h3 style={{ marginBottom: 4 }}>Belum ada event</h3>
+            <p className="muted" style={{ marginBottom: 12 }}>Buat event atau pre-order untuk ditampilkan di beranda.</p>
+            <button className="btn btn-sm" onClick={() => setEdit({ ...EMPTY })}>Buat event pertama</button>
+          </div>
+        )}
       </div>
+
       {edit && (
         <div className="modal-bg" onClick={() => setEdit(null)}>
           <form className="modal" onClick={(e) => e.stopPropagation()} onSubmit={save}>

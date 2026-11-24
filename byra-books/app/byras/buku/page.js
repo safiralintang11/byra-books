@@ -1,7 +1,8 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { rupiah } from '@/lib/format';
+import { IconPlus, IconSearch } from '@/components/Icons';
 
 const EMPTY = {
   title: '', author: '', publisher: '', isbn: '', pages: '', synopsis: '', category: '',
@@ -21,7 +22,7 @@ export default function AdminBuku() {
 
   const load = useCallback(async () => {
     let query = supabase.from('books').select('*').order('created_at', { ascending: false }).limit(300);
-    const s = q.replace(/[,()%]/g, ' ').trim();
+    const s = q.replace(/[,()%"]/g, ' ').trim();
     if (s) query = query.or(`title.ilike.%${s}%,author.ilike.%${s}%,isbn.ilike.%${s}%`);
     const { data } = await query;
     setBooks(data || []);
@@ -74,37 +75,79 @@ export default function AdminBuku() {
     if (error) setMsg(error.message); else load();
   };
 
-  const T = ({ k, label, type = 'text', ...rest }) => (
-    <div className="field"><label>{label}</label>
+  const field = (k, label, type = 'text', rest = {}) => (
+    <div className="field" key={k}><label>{label}</label>
       <input type={type} value={edit[k] ?? ''} onChange={(e) => set(k, e.target.value)} {...rest} /></div>
   );
 
   return (
     <>
-      <div className="row between">
-        <h1>Buku</h1>
-        <button className="btn" onClick={() => setEdit({ ...EMPTY })}>+ Tambah buku</button>
+      <div className="row between" style={{ marginBottom: 4 }}>
+        <div>
+          <h1>Buku</h1>
+          <p className="muted" style={{ margin: 0 }}>{books.length} buku ditampilkan · kelola stok, harga, dan label.</p>
+        </div>
+        <button className="btn" onClick={() => setEdit({ ...EMPTY })}>
+          <IconPlus width={17} height={17} /> Tambah buku
+        </button>
       </div>
-      <input placeholder="🔍 Cari judul / penulis / ISBN" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 12 }} />
+
+      <div className="row" style={{ margin: '16px 0' }}>
+        <div className="search-box" style={{ maxWidth: 360 }}>
+          <IconSearch width={17} height={17} />
+          <input placeholder="Cari judul / penulis / ISBN" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Cari buku" />
+        </div>
+      </div>
+
       {msg && !edit && <div className="alert">{msg}</div>}
+
       <div className="table-wrap">
         <table>
-          <thead><tr><th>Judul</th><th>Jenis</th><th>Harga</th><th>Stok</th><th></th></tr></thead>
+          <thead>
+            <tr><th>Buku</th><th>Jenis</th><th>Harga</th><th>Stok</th><th style={{ textAlign: 'right' }}>Aksi</th></tr>
+          </thead>
           <tbody>
             {books.map((b) => (
               <tr key={b.id} style={{ opacity: b.is_active ? 1 : 0.5 }}>
-                <td><b>{b.title}</b><div className="muted">{b.author} · {b.isbn}</div></td>
-                <td>{b.status === 'preorder' ? 'PO' : 'Ready'} · {b.origin}</td>
-                <td>{rupiah(b.price)}{b.discount_price ? <div className="muted">disk {rupiah(b.discount_price)}</div> : null}</td>
-                <td style={{ width: 90 }}>
+                <td>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    {b.cover_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={b.cover_url} alt="" style={{ width: 34, height: 48, objectFit: 'cover', borderRadius: 6, flex: 'none' }} />
+                    ) : (
+                      <span style={{ width: 34, height: 48, borderRadius: 6, background: 'var(--sky-soft)', flex: 'none' }} />
+                    )}
+                    <div style={{ minWidth: 0 }}>
+                      <b>{b.title}</b>
+                      <div className="muted" style={{ fontSize: '.78rem' }}>{b.author || '—'}{b.isbn ? ` · ${b.isbn}` : ''}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span className={`badge ${b.status === 'preorder' ? 'b-po' : 'b-new'}`}>{b.status === 'preorder' ? 'PO' : 'Ready'}</span>{' '}
+                  <span className="badge b-imp" style={{ marginTop: 4 }}>{b.origin}</span>
+                </td>
+                <td>
+                  {rupiah(b.price)}
+                  {b.discount_price ? <div className="muted" style={{ fontSize: '.76rem' }}>disk {rupiah(b.discount_price)}</div> : null}
+                </td>
+                <td style={{ width: 100 }}>
                   <input type="number" defaultValue={b.stock} onBlur={(e) => Number(e.target.value) !== b.stock && quickStock(b, e.target.value)} />
                 </td>
-                <td style={{ whiteSpace: 'nowrap' }}>
-                  <button className="btn btn-ghost btn-sm" onClick={() => setEdit({ ...EMPTY, ...Object.fromEntries(Object.entries(b).map(([k, v]) => [k, v ?? EMPTY[k] ?? ''])) })}>Edit</button>{' '}
+                <td style={{ whiteSpace: 'nowrap', textAlign: 'right' }}>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setEdit({ ...EMPTY, ...Object.fromEntries(Object.entries(b).map(([k, v]) => [k, v ?? EMPTY[k] ?? ''])) })}
+                  >
+                    Edit
+                  </button>{' '}
                   <button className="btn btn-danger btn-sm" onClick={() => hapus(b)}>Hapus</button>
                 </td>
               </tr>
             ))}
+            {books.length === 0 && (
+              <tr><td colSpan={5} className="muted" style={{ textAlign: 'center', padding: 28 }}>Belum ada buku. Tambah manual atau import Excel.</td></tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -114,18 +157,18 @@ export default function AdminBuku() {
           <form className="modal" onClick={(e) => e.stopPropagation()} onSubmit={save}>
             <h2>{edit.id ? 'Edit buku' : 'Tambah buku'}</h2>
             <div className="grid grid-2">
-              <T k="title" label="Judul *" required />
-              <T k="author" label="Penulis" />
-              <T k="publisher" label="Penerbit" />
-              <T k="isbn" label="ISBN" />
-              <T k="category" label="Kategori" />
-              <T k="language" label="Bahasa" />
-              <T k="year" label="Tahun terbit" type="number" />
-              <T k="pages" label="Jumlah halaman" type="number" />
-              <T k="weight_grams" label="Berat (gram)" type="number" />
-              <T k="price" label="Harga (Rp)" type="number" />
-              <T k="discount_price" label="Harga diskon (opsional)" type="number" />
-              <T k="stock" label="Stok" type="number" />
+              {field('title', 'Judul *', 'text', { required: true })}
+              {field('author', 'Penulis')}
+              {field('publisher', 'Penerbit')}
+              {field('isbn', 'ISBN')}
+              {field('category', 'Kategori')}
+              {field('language', 'Bahasa')}
+              {field('year', 'Tahun terbit', 'number')}
+              {field('pages', 'Jumlah halaman', 'number')}
+              {field('weight_grams', 'Berat (gram)', 'number')}
+              {field('price', 'Harga (Rp)', 'number')}
+              {field('discount_price', 'Harga diskon (opsional)', 'number')}
+              {field('stock', 'Stok', 'number')}
               <div className="field"><label>Status</label>
                 <select value={edit.status} onChange={(e) => set('status', e.target.value)}>
                   <option value="ready">Ready stock</option><option value="preorder">Pre-Order</option>
@@ -138,20 +181,23 @@ export default function AdminBuku() {
                 <select value={edit.format} onChange={(e) => set('format', e.target.value)}>
                   <option>Paperback</option><option>Hardcover</option>
                 </select></div>
-              <T k="preorder_close" label="Tutup PO (tanggal)" type="date" />
+              {field('preorder_close', 'Tutup PO (tanggal)', 'date')}
               <div className="field"><label>Event / PO</label>
                 <select value={edit.event_id || ''} onChange={(e) => set('event_id', e.target.value)}>
                   <option value="">— tidak ada —</option>
                   {events.map((ev) => <option key={ev.id} value={ev.id}>{ev.title}</option>)}
                 </select></div>
-              <T k="shopee_url" label="Link Shopee (opsional)" />
+              {field('shopee_url', 'Link Shopee (opsional)')}
             </div>
             <div className="field"><label>Sinopsis</label>
               <textarea rows={4} value={edit.synopsis || ''} onChange={(e) => set('synopsis', e.target.value)} /></div>
             <div className="field"><label>Sampul (upload atau tempel URL)</label>
               <input type="file" accept="image/*" onChange={(e) => uploadCover(e.target.files?.[0])} />
               <input style={{ marginTop: 6 }} placeholder="https://…" value={edit.cover_url || ''} onChange={(e) => set('cover_url', e.target.value)} />
-              {edit.cover_url && <img src={edit.cover_url} alt="" style={{ height: 100, marginTop: 6, borderRadius: 8 }} />}
+              {edit.cover_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={edit.cover_url} alt="" style={{ height: 100, marginTop: 8, borderRadius: 8, border: '1px solid var(--line)' }} />
+              )}
             </div>
             <div className="field">
               {[['is_bestseller', 'Best Seller'], ['is_new', 'Buku Baru'], ['is_special', 'Special Edition'], ['is_active', 'Tampil di toko']].map(([k, l]) => (
@@ -159,7 +205,7 @@ export default function AdminBuku() {
               ))}
             </div>
             {msg && <div className="alert">{msg}</div>}
-            <div className="row">
+            <div className="row" style={{ marginTop: 8 }}>
               <button className="btn" disabled={busy}>{busy ? 'Menyimpan…' : 'Simpan'}</button>
               <button type="button" className="btn btn-ghost" onClick={() => setEdit(null)}>Batal</button>
             </div>
