@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { dbError } from '@/lib/format';
 import { IconBook, IconCreditCard, IconInstagram, IconCheck } from '@/components/Icons';
 
 const FIELDS = [
@@ -38,7 +39,7 @@ export default function Pengaturan() {
     const path = `qris-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
     const { error } = await supabase.storage.from('covers').upload(path, file);
     setBusy(false);
-    if (error) { setMsg(error.message); return; }
+    if (error) { setMsg(dbError(error.message)); return; }
     setV((p) => ({ ...p, qris_url: supabase.storage.from('covers').getPublicUrl(path).data.publicUrl }));
   };
 
@@ -47,7 +48,7 @@ export default function Pengaturan() {
     const rows = FIELDS.map(([key]) => ({ key, value: v[key] || '' }));
     const { error } = await supabase.from('settings').upsert(rows);
     setBusy(false);
-    setMsg(error ? error.message : 'Pengaturan tersimpan ✔');
+    setMsg(error ? dbError(error.message) : 'Pengaturan tersimpan ✔');
   };
 
   const renderField = (key) => {

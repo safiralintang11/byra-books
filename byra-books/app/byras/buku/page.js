@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { rupiah } from '@/lib/format';
+import { rupiah, dbError } from '@/lib/format';
 import { IconPlus, IconSearch } from '@/components/Icons';
 
 const EMPTY = {
@@ -39,7 +39,7 @@ export default function AdminBuku() {
     const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
     const { error } = await supabase.storage.from('covers').upload(path, file);
     setBusy(false);
-    if (error) { setMsg(error.message); return; }
+    if (error) { setMsg(dbError(error.message)); return; }
     set('cover_url', supabase.storage.from('covers').getPublicUrl(path).data.publicUrl);
   };
 
@@ -60,19 +60,20 @@ export default function AdminBuku() {
       ? await supabase.from('books').update(row).eq('id', id)
       : await supabase.from('books').insert(row);
     setBusy(false);
-    if (error) { setMsg(error.message); return; }
+    if (error) { setMsg(dbError(error.message)); return; }
     setEdit(null);
     load();
   };
 
   const quickStock = async (b, val) => {
-    await supabase.from('books').update({ stock: Number(val) }).eq('id', b.id);
+    const { error } = await supabase.from('books').update({ stock: Number(val) }).eq('id', b.id);
+    if (error) { setMsg(dbError(error.message)); return; }
     load();
   };
   const hapus = async (b) => {
     if (!confirm(`Hapus "${b.title}"? (pesanan lama tetap tersimpan)`)) return;
     const { error } = await supabase.from('books').delete().eq('id', b.id);
-    if (error) setMsg(error.message); else load();
+    if (error) setMsg(dbError(error.message)); else load();
   };
 
   const field = (k, label, type = 'text', rest = {}) => (

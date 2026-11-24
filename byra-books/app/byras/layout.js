@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { dbError } from '@/lib/format';
 import {
   IconHome, IconReceipt, IconBook, IconUpload, IconTag, IconCalculator,
   IconChart, IconSettings, IconMenu, IconLogout, IconArrowRight, IconSparkle,
@@ -33,14 +34,14 @@ export default function AdminLayout({ children }) {
       if (!session) { setState('login'); return; }
       const { data, error } = await supabase.rpc('is_admin');
       if (error) {
-        setErr(error.message);
+        setErr(dbError(error.message));
         setState('error');
         return;
       }
       setErr('');
       setState(data ? 'ok' : 'denied');
     } catch (e) {
-      setErr(e?.message || 'Tidak bisa terhubung ke Supabase.');
+      setErr(dbError(e?.message) || 'Tidak bisa terhubung ke Supabase.');
       setState('error');
     }
   };

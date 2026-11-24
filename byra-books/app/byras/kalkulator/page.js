@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { dbError } from '@/lib/format';
 import { IconCalculator } from '@/components/Icons';
 import {
   CURRENCIES, CURRENCY_LABEL, CURRENCY_SYMBOL, computeBreakdown, isConfigured, formatIdr, formatForeign,
@@ -41,7 +42,7 @@ function CurrencyCard({ initial }) {
     };
     const { error } = await supabase.from('calc_settings').upsert(row, { onConflict: 'currency' });
     setBusy(false);
-    if (error) { setMsg({ type: 'err', text: error.message }); return; }
+    if (error) { setMsg({ type: 'err', text: dbError(error.message) }); return; }
     setSaved(row);
     setMsg({ type: 'ok', text: 'Tersimpan ✔' });
   };
@@ -107,7 +108,7 @@ export default function AdminKalkulator() {
 
   useEffect(() => {
     supabase.from('calc_settings').select('*').then(({ data, error: err }) => {
-      if (err) { setError(err.message); setRows([]); return; }
+      if (err) { setError(dbError(err.message)); setRows([]); return; }
       const byCur = Object.fromEntries((data || []).map((r) => [r.currency, r]));
       setRows(CURRENCIES.map((c) => byCur[c] || DEFAULT_ROW(c)));
     });

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { tanggal } from '@/lib/format';
+import { tanggal, dbError } from '@/lib/format';
 import { IconPlus, IconTag } from '@/components/Icons';
 
 const EMPTY = { title: '', description: '', kind: 'PO', starts_on: '', ends_on: '', banner_url: '', is_active: true };
@@ -23,7 +23,7 @@ export default function AdminEvent() {
     ['starts_on', 'ends_on', 'banner_url', 'description'].forEach((k) => { if (row[k] === '') row[k] = null; });
     const id = row.id; delete row.id; delete row.created_at;
     const { error } = id ? await supabase.from('events').update(row).eq('id', id) : await supabase.from('events').insert(row);
-    if (error) { setMsg(error.message); return; }
+    if (error) { setMsg(dbError(error.message)); return; }
     setEdit(null); setMsg(''); load();
   };
   const hapus = async (ev) => {

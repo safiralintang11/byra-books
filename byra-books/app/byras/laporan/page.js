@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import { rupiah, STATUS, STATUS_PAID, downloadCsv, tanggalJam } from '@/lib/format';
+import { rupiah, STATUS, STATUS_PAID, downloadCsv, tanggalJam, dbError } from '@/lib/format';
 import { IconReceipt, IconCheck, IconChart, IconUpload } from '@/components/Icons';
 
 const iso = (d) => d.toISOString().slice(0, 10);
@@ -21,7 +21,7 @@ export default function Laporan() {
       .gte('created_at', start)
       .lte('created_at', end)
       .order('created_at', { ascending: false }).limit(5000)
-      .then(({ data, error }) => { if (error) setMsg(error.message); setOrders(data || []); });
+      .then(({ data, error }) => { if (error) setMsg(dbError(error.message)); setOrders(data || []); });
   }, [from, to]);
 
   const r = useMemo(() => {

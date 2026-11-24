@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { parseCsv } from '@/lib/format';
+import { parseCsv, dbError } from '@/lib/format';
 import { IconUpload, IconBook } from '@/components/Icons';
 import {
   COLUMNS, SAMPLE_ROWS, GUIDE_ROWS, parseBookRows, groupBySignature, chunk, bookToExcelRow,
@@ -79,7 +79,7 @@ export default function Import() {
       setParsed(null);
       setFileName('');
     } catch (e) {
-      say('err', `Import gagal: ${e.message || e}. Sebagian buku mungkin sudah masuk; ulangi import aman untuk buku ber-ISBN.`);
+      say('err', `Import gagal: ${dbError(e.message || e)}`);
     }
     setBusy(false);
   };
@@ -95,7 +95,7 @@ export default function Import() {
   const exportAll = async () => {
     setBusy(true);
     const { data, error } = await supabase.from('books').select('*').order('title').limit(10000);
-    if (error) { setBusy(false); say('err', error.message); return; }
+    if (error) { setBusy(false); say('err', dbError(error.message)); return; }
     const XLSX = await loadXlsx();
     saveWorkbook(XLSX, 'buku-byra.xlsx', [
       { name: 'Buku', rows: [COLUMNS, ...(data || []).map(bookToExcelRow)], widths: WIDTHS },

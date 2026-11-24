@@ -2,7 +2,7 @@
 import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { rupiah, tanggalJam, STATUS, waLink } from '@/lib/format';
+import { rupiah, tanggalJam, STATUS, waLink, dbError } from '@/lib/format';
 import { IconSearch, IconChevronDown, IconWhatsApp, IconReceipt } from '@/components/Icons';
 
 function Pesanan() {
@@ -19,7 +19,7 @@ function Pesanan() {
     const s = q.replace(/[,()%"]/g, ' ').trim();
     if (s) query = query.or(`code.ilike.%${s}%,customer_name.ilike.%${s}%,phone.ilike.%${s}%`);
     const { data, error } = await query;
-    if (error) setMsg(error.message);
+    if (error) setMsg(dbError(error.message));
     setOrders(data || []);
   }, [status, q]);
 
@@ -27,7 +27,7 @@ function Pesanan() {
 
   const update = async (o, patch) => {
     const { error } = await supabase.from('orders').update(patch).eq('id', o.id);
-    if (error) { setMsg(error.message); return; }
+    if (error) { setMsg(dbError(error.message)); return; }
     setMsg('Tersimpan ✔');
     load();
   };

@@ -1,5 +1,16 @@
 export const rupiah = (n) => 'Rp' + Number(n || 0).toLocaleString('id-ID');
 
+export function dbError(message) {
+  const m = String(message || '');
+  if (/permission denied/i.test(m)) {
+    return 'Akses database ditolak. Jalankan file supabase/migrations/003_grants_dan_stok.sql di Supabase → SQL Editor, lalu refresh halaman.';
+  }
+  if (/relation .* does not exist/i.test(m)) {
+    return 'Tabel database belum dibuat. Jalankan file supabase/schema.sql di Supabase → SQL Editor.';
+  }
+  return m;
+}
+
 export const tanggal = (d) =>
   d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 
