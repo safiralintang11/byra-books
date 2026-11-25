@@ -30,7 +30,7 @@
   --shadow-lg: 0 30px 70px -30px rgba(29, 53, 80, .35);
   --font-serif: Georgia, 'Times New Roman', serif;
   --ease: cubic-bezier(.22, .8, .28, 1);
-  --container-pad: clamp(20px, 4vw, 40px);
+  --container-pad: clamp(24px, 4vw, 48px);
   --section-space: clamp(44px, 6vw, 76px);
   --grid-gap: clamp(18px, 2.2vw, 26px);
   --card-pad: clamp(22px, 2.4vw, 30px);
@@ -1679,7 +1679,7 @@ tbody tr:hover { background: #fbfdff; }
 }
 
 @media (max-width: 700px) {
-  .container { padding: 0 20px; }
+  .container { padding: 0 22px; }
   .nav-lang { display: none; }
   .about-hero { grid-template-columns: 1fr; padding: 32px 24px; }
   .about-hero-art { display: none; }
@@ -1688,7 +1688,7 @@ tbody tr:hover { background: #fbfdff; }
   .book-list-row { flex-wrap: wrap; }
   .book-list-price { text-align: left; }
   .book-list-row .add-btn { margin-left: auto; }
-  .section { padding: 44px 0; }
+  .section { padding: 52px 0; }
   .brand img { height: 34px; }
   .nav-actions { gap: 6px; }
   .cart-btn {
@@ -1714,9 +1714,9 @@ tbody tr:hover { background: #fbfdff; }
   .book3d { width: 210px; }
   .float-chip.f2 { right: 0; }
   .float-chip.f1 { left: 0; }
-  .cat-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .cat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
   .cat-card:last-child { grid-column: 1 / -1; }
-  .grid-books { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 16px; }
+  .grid-books { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 18px; }
   .section-head { align-items: flex-start; flex-direction: column; gap: 8px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
   .footer-brand { grid-column: 1 / -1; }
@@ -1734,7 +1734,7 @@ tbody tr:hover { background: #fbfdff; }
 }
 
 @media (max-width: 420px) {
-  .grid-books { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-books { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px; }
   .book-title { font-size: .86rem; }
   .price { font-size: .92rem; }
   .footer-grid { grid-template-columns: 1fr; }

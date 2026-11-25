@@ -32,17 +32,19 @@ function Row({ title, subtitle, href, books }) {
   if (!books.length) return null;
   return (
     <Reveal as="section" className="section">
-      <div className="section-head">
-        <div>
-          <h2>{title}</h2>
-          {subtitle && <p className="sub">{subtitle}</p>}
+      <div className="container">
+        <div className="section-head">
+          <div>
+            <h2>{title}</h2>
+            {subtitle && <p className="sub">{subtitle}</p>}
+          </div>
+          <Link href={href} className="section-link">
+            {t('common.viewAll')} <IconArrowRight width={16} height={16} />
+          </Link>
         </div>
-        <Link href={href} className="section-link">
-          {t('common.viewAll')} <IconArrowRight width={16} height={16} />
-        </Link>
-      </div>
-      <div className="grid grid-books">
-        {books.map((b) => <BookCard key={b.id} book={b} />)}
+        <div className="grid grid-books">
+          {books.map((b) => <BookCard key={b.id} book={b} />)}
+        </div>
       </div>
     </Reveal>
   );
@@ -102,11 +104,13 @@ export default function Home() {
 
   const emptyState = (
     <Reveal as="section" className="section" key="empty">
-      <div className="empty-state">
-        <div className="icon"><IconBook width={30} height={30} /></div>
-        <h3>{t('home.empty.title')}</h3>
-        <p className="muted">{t('home.empty.body')}</p>
-        <Link href="/katalog" className="btn btn-ghost">{t('home.empty.cta')}</Link>
+      <div className="container">
+        <div className="empty-state">
+          <div className="icon"><IconBook width={30} height={30} /></div>
+          <h3>{t('home.empty.title')}</h3>
+          <p className="muted">{t('home.empty.body')}</p>
+          <Link href="/katalog" className="btn btn-ghost">{t('home.empty.cta')}</Link>
+        </div>
       </div>
     </Reveal>
   );
@@ -179,14 +183,16 @@ export default function Home() {
     if (sec.id === 'categories') {
       return (
         <Reveal as="section" className="section" key="categories">
-          <div className="cat-grid">
-            {categories.map(({ href, icon: Icon, title, sub }) => (
-              <Link key={href} href={href} className="cat-card">
-                <span className="cat-icon"><Icon width={21} height={21} /></span>
-                <b>{title}</b>
-                <span>{sub}</span>
-              </Link>
-            ))}
+          <div className="container">
+            <div className="cat-grid">
+              {categories.map(({ href, icon: Icon, title, sub }) => (
+                <Link key={href} href={href} className="cat-card">
+                  <span className="cat-icon"><Icon width={21} height={21} /></span>
+                  <b>{title}</b>
+                  <span>{sub}</span>
+                </Link>
+              ))}
+            </div>
           </div>
         </Reveal>
       );
@@ -196,26 +202,28 @@ export default function Home() {
       if (events.length === 0) return null;
       return (
         <Reveal as="section" className="section" key="events">
-          <div className="section-head">
-            <div>
-              <h2>{pickText(sec, 'title', t('home.events.title'))}</h2>
-              <p className="sub">{pickText(sec, 'subtitle', t('home.events.subtitle'))}</p>
-            </div>
-            <Link href="/katalog" className="section-link">
-              {t('home.events.all')} <IconArrowRight width={16} height={16} />
-            </Link>
-          </div>
-          <div className="grid grid-2">
-            {events.map((e) => (
-              <Link key={e.id} href={`/katalog?event=${e.id}`} className="card event-card">
-                <span className="badge b-po">{e.kind}</span>
-                <h3>{e.title}</h3>
-                <div className="muted" style={{ fontSize: '.82rem', fontWeight: 700 }}>
-                  {e.starts_on && tanggal(e.starts_on, lang)} {e.ends_on && `– ${tanggal(e.ends_on, lang)}`}
-                </div>
-                <p style={{ margin: '8px 0 0', color: 'var(--steel)', fontSize: '.9rem' }}>{e.description}</p>
+          <div className="container">
+            <div className="section-head">
+              <div>
+                <h2>{pickText(sec, 'title', t('home.events.title'))}</h2>
+                <p className="sub">{pickText(sec, 'subtitle', t('home.events.subtitle'))}</p>
+              </div>
+              <Link href="/katalog" className="section-link">
+                {t('home.events.all')} <IconArrowRight width={16} height={16} />
               </Link>
-            ))}
+            </div>
+            <div className="grid grid-2">
+              {events.map((e) => (
+                <Link key={e.id} href={`/katalog?event=${e.id}`} className="card event-card">
+                  <span className="badge b-po">{e.kind}</span>
+                  <h3>{e.title}</h3>
+                  <div className="muted" style={{ fontSize: '.82rem', fontWeight: 700 }}>
+                    {e.starts_on && tanggal(e.starts_on, lang)} {e.ends_on && `– ${tanggal(e.ends_on, lang)}`}
+                  </div>
+                  <p style={{ margin: '8px 0 0', color: 'var(--steel)', fontSize: '.9rem' }}>{e.description}</p>
+                </Link>
+              ))}
+            </div>
           </div>
         </Reveal>
       );
@@ -243,18 +251,20 @@ export default function Home() {
     if (sec.id === 'features') {
       return (
         <Reveal as="section" className="section" key="features">
-          <div className="feature-band">
-            <div className="feature">
-              <span className="fi"><IconReceipt width={20} height={20} /></span>
-              <div><b>{t('home.feat1.title')}</b><span>{t('home.feat1.desc')}</span></div>
-            </div>
-            <div className="feature">
-              <span className="fi"><IconBox width={20} height={20} /></span>
-              <div><b>{t('home.feat2.title')}</b><span>{t('home.feat2.desc')}</span></div>
-            </div>
-            <div className="feature">
-              <span className="fi"><IconHeart width={20} height={20} /></span>
-              <div><b>{t('home.feat3.title')}</b><span>{t('home.feat3.desc')}</span></div>
+          <div className="container">
+            <div className="feature-band">
+              <div className="feature">
+                <span className="fi"><IconReceipt width={20} height={20} /></span>
+                <div><b>{t('home.feat1.title')}</b><span>{t('home.feat1.desc')}</span></div>
+              </div>
+              <div className="feature">
+                <span className="fi"><IconBox width={20} height={20} /></span>
+                <div><b>{t('home.feat2.title')}</b><span>{t('home.feat2.desc')}</span></div>
+              </div>
+              <div className="feature">
+                <span className="fi"><IconHeart width={20} height={20} /></span>
+                <div><b>{t('home.feat3.title')}</b><span>{t('home.feat3.desc')}</span></div>
+              </div>
             </div>
           </div>
         </Reveal>
@@ -264,33 +274,35 @@ export default function Home() {
     if (sec.id === 'cta') {
       return (
         <Reveal as="section" className="section" key="cta">
-          <div className="cta-band">
-            <div>
-              <span className="eyebrow" style={{ background: 'rgba(255,255,255,.12)', borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>
-                <IconGift width={14} height={14} /> {t('home.cta.eyebrow')}
-              </span>
-              <h2 style={{ marginTop: 14 }}>{pickText(sec, 'title', t('home.cta.title'))}</h2>
-              <p>{pickText(sec, 'subtitle', t('home.cta.body'))}</p>
-            </div>
-            <div className="row">
-              {s.wa_number ? (
-                <a
-                  className="btn btn-pink btn-lg"
-                  href={waLink(s.wa_number, t('wa.general'))}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <IconWhatsApp width={18} height={18} /> {t('home.cta.chat')}
-                </a>
-              ) : (
-                <Link className="btn btn-pink btn-lg" href="/katalog">{t('home.cta.shop')}</Link>
-              )}
-              {showCalc && (
-                <Link className="btn btn-ghost btn-lg" href="/kalkulator">
-                  <IconCalculator width={18} height={18} /> {t('home.cta.calc')}
-                </Link>
-              )}
-              <JoinGroup size="btn-lg" label={t('nav.joinGroup')} />
+          <div className="container">
+            <div className="cta-band">
+              <div>
+                <span className="eyebrow" style={{ background: 'rgba(255,255,255,.12)', borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>
+                  <IconGift width={14} height={14} /> {t('home.cta.eyebrow')}
+                </span>
+                <h2 style={{ marginTop: 14 }}>{pickText(sec, 'title', t('home.cta.title'))}</h2>
+                <p>{pickText(sec, 'subtitle', t('home.cta.body'))}</p>
+              </div>
+              <div className="row">
+                {s.wa_number ? (
+                  <a
+                    className="btn btn-pink btn-lg"
+                    href={waLink(s.wa_number, t('wa.general'))}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <IconWhatsApp width={18} height={18} /> {t('home.cta.chat')}
+                  </a>
+                ) : (
+                  <Link className="btn btn-pink btn-lg" href="/katalog">{t('home.cta.shop')}</Link>
+                )}
+                {showCalc && (
+                  <Link className="btn btn-ghost btn-lg" href="/kalkulator">
+                    <IconCalculator width={18} height={18} /> {t('home.cta.calc')}
+                  </Link>
+                )}
+                <JoinGroup size="btn-lg" label={t('nav.joinGroup')} />
+              </div>
             </div>
           </div>
         </Reveal>
