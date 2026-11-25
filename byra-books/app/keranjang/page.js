@@ -1,6 +1,8 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart';
+import { useI18n } from '@/lib/i18n';
 import { rupiah } from '@/lib/format';
 import { Cover } from '@/components/BookCard';
 import {
@@ -9,22 +11,30 @@ import {
 
 export default function Keranjang() {
   const { items, setQty, remove, subtotal } = useCart();
+  const { t } = useI18n();
+  const [note, setNote] = useState('');
+  useEffect(() => {
+    const n = sessionStorage.getItem('byra_reorder_note');
+    if (n) { setNote(n); sessionStorage.removeItem('byra_reorder_note'); }
+  }, []);
   const hasPo = items.some((i) => i.status === 'preorder');
 
   return (
     <div className="container">
       <div className="page-head">
-        <span className="eyebrow"><IconCart width={14} height={14} /> Keranjang</span>
-        <h1 style={{ marginTop: 14 }}>Keranjang belanja</h1>
-        <p>Periksa kembali pilihanmu sebelum checkout.</p>
+        <span className="eyebrow"><IconCart width={14} height={14} /> {t('cart.eyebrow')}</span>
+        <h1 style={{ marginTop: 14 }}>{t('cart.title')}</h1>
+        <p>{t('cart.subtitle')}</p>
       </div>
+
+      {note && <div className="alert info">{note}</div>}
 
       {items.length === 0 ? (
         <div className="empty-state" style={{ marginBottom: 48 }}>
           <div className="icon"><IconCart width={30} height={30} /></div>
-          <h3>Keranjangmu masih kosong</h3>
-          <p className="muted">Mulai dari rak buku terbaru atau cari judul favoritmu.</p>
-          <Link href="/katalog" className="btn">Mulai belanja <IconArrowRight width={16} height={16} /></Link>
+          <h3>{t('cart.empty.title')}</h3>
+          <p className="muted">{t('cart.empty.body')}</p>
+          <Link href="/katalog" className="btn">{t('cart.empty.cta')} <IconArrowRight width={16} height={16} /></Link>
         </div>
       ) : (
         <div className="cart-grid" style={{ paddingBottom: 48 }}>
@@ -35,13 +45,13 @@ export default function Keranjang() {
                 <div className="cart-item-info">
                   <Link href={`/buku/${i.id}`} className="book-title">{i.title}</Link>
                   <div className="book-author">{i.author}</div>
-                  {i.status === 'preorder' && <span className="badge b-po" style={{ marginTop: 5 }}>Pre-Order</span>}
+                  {i.status === 'preorder' && <span className="badge b-po" style={{ marginTop: 5 }}>{t('badge.preorder')}</span>}
                   <div className="price" style={{ marginTop: 5 }}>{rupiah(i.price)}</div>
                 </div>
                 <div className="qty">
-                  <button type="button" onClick={() => setQty(i.id, i.qty - 1)} aria-label="Kurangi jumlah"><IconMinus width={14} height={14} /></button>
+                  <button type="button" onClick={() => setQty(i.id, i.qty - 1)} aria-label={t('cart.minus')}><IconMinus width={14} height={14} /></button>
                   <span>{i.qty}</span>
-                  <button type="button" onClick={() => setQty(i.id, i.qty + 1)} aria-label="Tambah jumlah"><IconPlus width={14} height={14} /></button>
+                  <button type="button" onClick={() => setQty(i.id, i.qty + 1)} aria-label={t('cart.plus')}><IconPlus width={14} height={14} /></button>
                 </div>
                 <div style={{ textAlign: 'right', minWidth: 100 }}>
                   <b style={{ color: 'var(--navy)' }}>{rupiah(i.price * i.qty)}</b>
@@ -52,35 +62,35 @@ export default function Keranjang() {
                       onClick={() => remove(i.id)}
                       style={{ marginTop: 6, padding: '6px 10px' }}
                     >
-                      Hapus
+                      {t('cart.remove')}
                     </button>
                   </div>
                 </div>
               </div>
             ))}
             <Link href="/katalog" className="section-link" style={{ marginTop: 6 }}>
-              <IconArrowLeft width={16} height={16} /> Lanjut belanja
+              <IconArrowLeft width={16} height={16} /> {t('cart.continue')}
             </Link>
           </div>
 
           <aside className="summary-card">
-            <h2>Ringkasan pesanan</h2>
-            <div className="summary-row"><span>Jumlah buku</span><b>{items.reduce((n, i) => n + i.qty, 0)} item</b></div>
-            <div className="summary-row"><span>Subtotal</span><b>{rupiah(subtotal)}</b></div>
-            <div className="summary-row"><span>Ongkir</span><span>dikonfirmasi admin</span></div>
-            <div className="summary-total"><span>Total sementara</span><b>{rupiah(subtotal)}</b></div>
+            <h2>{t('cart.summary')}</h2>
+            <div className="summary-row"><span>{t('common.items')}</span><b>{t('cart.itemCount', { count: items.reduce((n, i) => n + i.qty, 0) })}</b></div>
+            <div className="summary-row"><span>{t('cart.subtotal')}</span><b>{rupiah(subtotal)}</b></div>
+            <div className="summary-row"><span>{t('cart.shipping')}</span><span>{t('cart.shippingNote')}</span></div>
+            <div className="summary-total"><span>{t('cart.total')}</span><b>{rupiah(subtotal)}</b></div>
             <Link href="/checkout" className="btn btn-primary btn-block">
-              Checkout <IconArrowRight width={16} height={16} />
+              {t('cart.checkout')} <IconArrowRight width={16} height={16} />
             </Link>
             {hasPo && (
               <p className="muted" style={{ fontSize: '.78rem', margin: '12px 0 0' }}>
-                Keranjang berisi pre-order. Estimasi kedatangan akan dikonfirmasi admin via WhatsApp.
+                {t('cart.poNote')}
               </p>
             )}
             <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px dashed var(--line-strong)', display: 'grid', gap: 8 }}>
-              <span className="trust-pill"><IconCreditCard width={15} height={15} /> Transfer bank / QRIS</span>
-              <span className="trust-pill"><IconTruck width={15} height={15} /> Dikirim via ekspedisi pilihan</span>
-              <span className="trust-pill"><IconCheck width={15} height={15} /> Tanpa biaya tersembunyi</span>
+              <span className="trust-pill"><IconCreditCard width={15} height={15} /> {t('cart.trustPayment')}</span>
+              <span className="trust-pill"><IconTruck width={15} height={15} /> {t('cart.trustShip')}</span>
+              <span className="trust-pill"><IconCheck width={15} height={15} /> {t('cart.trustNoFee')}</span>
             </div>
           </aside>
         </div>

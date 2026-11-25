@@ -7,20 +7,16 @@ import {
   IconCart, IconHeart, IconMenu, IconX, IconArrowRight, IconWhatsApp,
 } from '@/components/Icons';
 import { useSettings } from '@/lib/useSettings';
+import { useI18n } from '@/lib/i18n';
 import { waLink } from '@/lib/format';
-
-const NAV = [
-  ['/katalog', 'Katalog'],
-  ['/katalog?status=ready', 'Ready Stock'],
-  ['/katalog?status=preorder', 'Pre-Order'],
-  ['/kalkulator', 'Kalkulator Impor'],
-  ['/pesanan', 'Lacak Pesanan'],
-];
+import LanguageToggle from '@/components/LanguageToggle';
+import JoinGroup from '@/components/JoinGroup';
 
 export default function Header() {
   const path = usePathname();
   const { count, wish } = useCart();
   const s = useSettings();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -47,6 +43,16 @@ export default function Header() {
 
   if (path.startsWith('/byras')) return null;
 
+  const showCalc = s.show_calculator === '1' || s.show_calculator === 'true';
+  const nav = [
+    ['/katalog', t('nav.catalog')],
+    ['/katalog?status=ready', t('nav.ready')],
+    ['/katalog?status=preorder', t('nav.preorder')],
+    ['/tentang', t('nav.about')],
+    ...(showCalc ? [['/kalkulator', t('nav.calculator')]] : []),
+    ['/pesanan', t('nav.track')],
+  ];
+
   const isActive = (href) => {
     const base = href.split('?')[0];
     if (base === '/katalog') return path === '/katalog' && !href.includes('?');
@@ -57,13 +63,13 @@ export default function Header() {
     <>
       <header className="site-header">
         <div className="container header-inner">
-          <Link href="/" className="brand" aria-label="Byra Books — beranda">
+          <Link href="/" className="brand" aria-label="Byra Books">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/logo-navy.png" alt="Byra Books" />
           </Link>
 
-          <nav className="nav" aria-label="Navigasi utama">
-            {NAV.map(([href, label]) => (
+          <nav className="nav" aria-label="Main navigation">
+            {nav.map(([href, label]) => (
               <Link key={href} href={href} className={`nav-link ${isActive(href) ? 'active' : ''}`}>
                 {label}
               </Link>
@@ -71,20 +77,21 @@ export default function Header() {
           </nav>
 
           <div className="nav-actions">
-            <Link href="/wishlist" className="icon-btn" aria-label="Wishlist" title="Wishlist">
+            <LanguageToggle className="nav-lang" />
+            <Link href="/wishlist" className="icon-btn" aria-label={t('nav.wishlist')} title={t('nav.wishlist')}>
               <IconHeart />
               {wish.length > 0 && <span className="dot" key={wish.length}>{wish.length}</span>}
             </Link>
             <Link href="/keranjang" className="cart-btn">
               <IconCart width={18} height={18} />
-              <span>Keranjang</span>
+              <span>{t('nav.cart')}</span>
               {count > 0 && <span className="count" key={count}>{count}</span>}
             </Link>
             <button
               type="button"
               className="icon-btn menu-toggle"
               onClick={() => setOpen(true)}
-              aria-label="Buka menu"
+              aria-label={t('nav.openMenu')}
               aria-expanded={open}
             >
               <IconMenu />
@@ -96,38 +103,42 @@ export default function Header() {
 
       <div className={`mobile-drawer ${open ? 'open' : ''}`} aria-hidden={!open}>
         <div className="scrim" onClick={() => setOpen(false)} />
-        <aside className="panel" role="dialog" aria-label="Menu navigasi">
+        <aside className="panel" role="dialog" aria-label={t('nav.menu')}>
           <div className="drawer-head">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/logo-navy.png" alt="Byra Books" />
-            <button type="button" className="icon-btn" onClick={() => setOpen(false)} aria-label="Tutup menu">
-              <IconX />
-            </button>
+            <div className="row" style={{ gap: 8 }}>
+              <LanguageToggle />
+              <button type="button" className="icon-btn" onClick={() => setOpen(false)} aria-label={t('nav.closeMenu')}>
+                <IconX />
+              </button>
+            </div>
           </div>
           <nav className="drawer-nav">
-            {NAV.map(([href, label]) => (
+            {nav.map(([href, label]) => (
               <Link key={href} href={href} className={isActive(href) ? 'active' : ''}>{label}</Link>
             ))}
             <Link href="/wishlist" className={path === '/wishlist' ? 'active' : ''}>
-              Wishlist {wish.length > 0 ? `(${wish.length})` : ''}
+              {t('nav.wishlist')} {wish.length > 0 ? `(${wish.length})` : ''}
             </Link>
             <Link href="/keranjang" className={path === '/keranjang' ? 'active' : ''}>
-              Keranjang {count > 0 ? `(${count})` : ''}
+              {t('nav.cart')} {count > 0 ? `(${count})` : ''}
             </Link>
           </nav>
           <div className="drawer-foot">
             <Link href="/katalog" className="btn btn-block">
-              Mulai belanja <IconArrowRight width={17} height={17} />
+              {t('home.ctaCatalog')} <IconArrowRight width={17} height={17} />
             </Link>
+            <JoinGroup className="btn-block" size="btn-sm" label={t('nav.joinGroup')} />
             {s.wa_number && (
               <a
-                href={waLink(s.wa_number, 'Halo Byra Books, saya mau tanya soal buku.')}
+                href={waLink(s.wa_number, t('wa.general'))}
                 target="_blank"
                 rel="noreferrer"
                 className="btn btn-ghost btn-block"
                 style={{ marginTop: 8 }}
               >
-                <IconWhatsApp width={17} height={17} /> Chat admin
+                <IconWhatsApp width={17} height={17} /> {t('nav.chatAdmin')}
               </a>
             )}
           </div>

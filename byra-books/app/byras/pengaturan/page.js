@@ -1,13 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useReloadSettings } from '@/lib/useSettings';
 import { dbError } from '@/lib/format';
 import { IconBook, IconCreditCard, IconInstagram, IconCheck } from '@/components/Icons';
 
 const FIELDS = [
   ['store_name', 'Nama toko', 'text'],
   ['wa_number', 'Nomor WhatsApp admin (format 628xxx)', 'text'],
-  ['announcement', 'Pengumuman di beranda', 'text'],
+  ['announcement_id', 'Pengumuman beranda (Indonesia)', 'text'],
+  ['announcement_en', 'Announcement (English)', 'text'],
   ['bank_info', 'Info transfer (bank, no. rekening, a.n.)', 'area'],
   ['qris_url', 'URL gambar QRIS', 'text'],
   ['instagram_url', 'Link Instagram', 'text'],
@@ -15,7 +17,7 @@ const FIELDS = [
 ];
 
 const GROUPS = [
-  { title: 'Informasi toko', icon: IconBook, keys: ['store_name', 'wa_number', 'announcement'] },
+  { title: 'Informasi toko', icon: IconBook, keys: ['store_name', 'wa_number', 'announcement_id', 'announcement_en'] },
   { title: 'Pembayaran', icon: IconCreditCard, keys: ['bank_info', 'qris_url'] },
   { title: 'Sosial & marketplace', icon: IconInstagram, keys: ['instagram_url', 'shopee_url'] },
 ];
@@ -23,6 +25,7 @@ const GROUPS = [
 const META = Object.fromEntries(FIELDS.map(([k, l, t]) => [k, { label: l, type: t }]));
 
 export default function Pengaturan() {
+  const reload = useReloadSettings();
   const [v, setV] = useState({});
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
@@ -48,6 +51,7 @@ export default function Pengaturan() {
     const rows = FIELDS.map(([key]) => ({ key, value: v[key] || '' }));
     const { error } = await supabase.from('settings').upsert(rows);
     setBusy(false);
+    if (!error) await reload();
     setMsg(error ? dbError(error.message) : 'Pengaturan tersimpan ✔');
   };
 
@@ -77,7 +81,7 @@ export default function Pengaturan() {
       <div className="row between" style={{ marginBottom: 4 }}>
         <div>
           <h1>Pengaturan Toko</h1>
-          <p className="muted" style={{ margin: 0 }}>Informasi ini tampil di toko dan halaman checkout.</p>
+          <p className="muted" style={{ margin: 0 }}>Informasi ini tampil di toko dan halaman checkout. Untuk layout beranda, katalog, About, dan grup order, buka menu Tampilan.</p>
         </div>
         <button className="btn" onClick={save} disabled={busy}>
           {busy ? 'Menyimpan…' : <><IconCheck width={17} height={17} /> Simpan</>}

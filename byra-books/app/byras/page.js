@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { rupiah, tanggalJam, STATUS, STATUS_PAID } from '@/lib/format';
 import {
-  IconReceipt, IconBox, IconChart, IconBook, IconArrowRight, IconUpload, IconCalculator, IconTag,
+  IconReceipt, IconBox, IconChart, IconBook, IconArrowRight, IconUpload, IconCalculator, IconTag, IconLayout,
 } from '@/components/Icons';
 
 export default function Dashboard() {
@@ -67,6 +67,7 @@ export default function Dashboard() {
           <Link href="/byras/pesanan" className="quick-link"><IconReceipt width={17} height={17} /> Proses pesanan</Link>
           <Link href="/byras/kalkulator" className="quick-link"><IconCalculator width={17} height={17} /> Atur kalkulator</Link>
           <Link href="/byras/event" className="quick-link"><IconTag width={17} height={17} /> Buat event</Link>
+          <Link href="/byras/tampilan" className="quick-link"><IconLayout width={17} height={17} /> Atur tampilan</Link>
         </div>
       </div>
 

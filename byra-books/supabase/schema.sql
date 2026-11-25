@@ -117,8 +117,17 @@ insert into public.settings (key, value) values
   ('bank_info', 'Transfer ke: BANK ... a.n. ... No. Rek ...'),
   ('qris_url', ''),
   ('announcement', 'Selamat datang di Byra Books! Cek section Pre-Order dan Event buku terbaru ya.'),
+  ('announcement_id', 'Selamat datang di Byra Books! Cek section Pre-Order dan Event buku terbaru ya.'),
+  ('announcement_en', 'Welcome to Byra Books! Check out our latest pre-orders and book events.'),
   ('instagram_url', ''),
-  ('shopee_url', '')
+  ('shopee_url', ''),
+  ('join_group_url', ''),
+  ('show_calculator', '0'),
+  ('catalog_default_view', 'grid'),
+  ('catalog_show_filters', '1'),
+  ('catalog_show_covers', '1'),
+  ('home_layout', ''),
+  ('about_sections', '')
 on conflict (key) do nothing;
 
 -- ---------- ROW LEVEL SECURITY ----------
@@ -178,9 +187,9 @@ begin
     raise exception 'Keranjang kosong';
   end if;
 
-  v_code := 'BYRA-' || upper(substr(encode(gen_random_bytes(4), 'hex'), 1, 6));
+  v_code := 'BYRA-' || upper(substr(md5(random()::text || clock_timestamp()::text), 1, 6));
   while exists (select 1 from public.orders where code = v_code) loop
-    v_code := 'BYRA-' || upper(substr(encode(gen_random_bytes(4), 'hex'), 1, 6));
+    v_code := 'BYRA-' || upper(substr(md5(random()::text || clock_timestamp()::text), 1, 6));
   end loop;
 
   insert into public.orders (code, customer_name, phone, email, address, city, courier, notes)
@@ -237,8 +246,13 @@ begin
     'subtotal', o.subtotal, 'shipping_cost', o.shipping_cost, 'total', o.total, 'status', o.status,
     'tracking_number', o.tracking_number, 'proof_url', o.proof_url, 'created_at', o.created_at,
     'updated_at', o.updated_at,
-    'items', coalesce((select json_agg(json_build_object('title', i.title, 'price', i.price, 'qty', i.qty,
-                'is_preorder', i.is_preorder)) from public.order_items i where i.order_id = o.id), '[]'::json)
+    'items', coalesce((select json_agg(json_build_object(
+                'book_id', i.book_id, 'title', i.title, 'price', i.price, 'qty', i.qty,
+                'is_preorder', i.is_preorder, 'author', b.author, 'cover_url', b.cover_url,
+                'book_status', b.status, 'stock', b.stock, 'isbn', b.isbn
+              ) order by i.id)
+              from public.order_items i left join public.books b on b.id = i.book_id
+              where i.order_id = o.id), '[]'::json)
   );
 end;
 $$;

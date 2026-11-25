@@ -6,8 +6,13 @@ import { supabase } from '@/lib/supabase';
 import { dbError } from '@/lib/format';
 import {
   IconHome, IconReceipt, IconBook, IconUpload, IconTag, IconCalculator,
-  IconChart, IconSettings, IconMenu, IconLogout, IconArrowRight, IconSparkle,
+  IconChart, IconSettings, IconMenu, IconLogout, IconArrowRight, IconSparkle, IconLayout,
 } from '@/components/Icons';
+
+const withTimeout = (promise, ms) => Promise.race([
+  promise,
+  new Promise((_, reject) => setTimeout(() => reject(new Error('Koneksi ke Supabase timeout. Coba lagi.')), ms)),
+]);
 
 const MENU = [
   ['/byras', 'Dashboard', IconHome],
@@ -16,6 +21,7 @@ const MENU = [
   ['/byras/import', 'Import / Export', IconUpload],
   ['/byras/event', 'Event & PO', IconTag],
   ['/byras/kalkulator', 'Kalkulator Fee', IconCalculator],
+  ['/byras/tampilan', 'Tampilan', IconLayout],
   ['/byras/laporan', 'Laporan', IconChart],
   ['/byras/pengaturan', 'Pengaturan', IconSettings],
 ];
@@ -30,9 +36,9 @@ export default function AdminLayout({ children }) {
 
   const check = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await withTimeout(supabase.auth.getSession(), 8000);
       if (!session) { setState('login'); return; }
-      const { data, error } = await supabase.rpc('is_admin');
+      const { data, error } = await withTimeout(supabase.rpc('is_admin'), 8000);
       if (error) {
         setErr(dbError(error.message));
         setState('error');
@@ -157,7 +163,8 @@ export default function AdminLayout({ children }) {
     );
   }
 
-  const active = MENU.find(([href]) => href === path) || MENU[0];
+  const isMenuActive = (href) => (href === '/byras' ? path === '/byras' : path === href || path.startsWith(`${href}/`));
+  const active = MENU.filter(([href]) => isMenuActive(href)).sort((a, b) => b[0].length - a[0].length)[0] || MENU[0];
 
   return (
     <div className="admin-wrap">
@@ -171,7 +178,7 @@ export default function AdminLayout({ children }) {
         <div className="admin-label">Menu utama</div>
         <nav className="admin-nav">
           {MENU.map(([href, label, Icon]) => (
-            <Link key={href} href={href} className={path === href ? 'on' : ''}>
+            <Link key={href} href={href} className={isMenuActive(href) ? 'on' : ''}>
               <Icon width={18} height={18} /> {label}
             </Link>
           ))}

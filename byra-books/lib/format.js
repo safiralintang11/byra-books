@@ -11,12 +11,14 @@ export function dbError(message) {
   return m;
 }
 
-export const tanggal = (d) =>
-  d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+const locale = (lang) => (lang === 'en' ? 'en-GB' : 'id-ID');
 
-export const tanggalJam = (d) =>
+export const tanggal = (d, lang = 'id') =>
+  d ? new Date(d).toLocaleDateString(locale(lang), { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+export const tanggalJam = (d, lang = 'id') =>
   d
-    ? new Date(d).toLocaleString('id-ID', {
+    ? new Date(d).toLocaleString(locale(lang), {
         day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
       })
     : '';
@@ -48,7 +50,7 @@ export const waLink = (number, text) =>
 export function downloadCsv(filename, rows) {
   const esc = (v) => {
     const s = v == null ? '' : String(v);
-    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   };
   const csv = rows.map((r) => r.map(esc).join(',')).join('\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });

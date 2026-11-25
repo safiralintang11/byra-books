@@ -118,6 +118,7 @@ export default function AdminKalkulator() {
     <>
       <h1>Kalkulator Fee</h1>
       <p className="muted" style={{ maxWidth: 760 }}>
+        Untuk menampilkan/menyembunyikan kalkulator di toko, buka menu <b>Tampilan</b>.
         Halaman <b>/kalkulator</b> di toko menampilkan hanya <b>total bayar</b> ke pelanggan. Kurs, buffer, ongkir, dan fee jastip
         di bawah ini tidak pernah terlihat oleh pelanggan. Mata uang baru muncul di kalkulator setelah kurs dan total quotation diisi.
       </p>

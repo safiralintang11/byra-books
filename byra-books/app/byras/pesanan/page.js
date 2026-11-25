@@ -1,9 +1,10 @@
 'use client';
 import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { rupiah, tanggalJam, STATUS, waLink, dbError } from '@/lib/format';
-import { IconSearch, IconChevronDown, IconWhatsApp, IconReceipt } from '@/components/Icons';
+import { IconSearch, IconChevronDown, IconWhatsApp, IconReceipt, IconUpload } from '@/components/Icons';
 
 function Pesanan() {
   const sp = useSearchParams();
@@ -42,8 +43,15 @@ function Pesanan() {
 
   return (
     <>
-      <h1>Pesanan</h1>
-      <p className="muted">Klik pesanan untuk melihat detail, mengubah status, dan mengabari pelanggan.</p>
+      <div className="row between" style={{ marginBottom: 4 }}>
+        <div>
+          <h1>Pesanan</h1>
+          <p className="muted" style={{ margin: 0 }}>Klik pesanan untuk melihat detail, mengubah status, dan mengabari pelanggan.</p>
+        </div>
+        <Link href="/byras/pesanan/import" className="btn btn-ghost btn-sm">
+          <IconUpload width={16} height={16} /> Import order lama
+        </Link>
+      </div>
 
       <div className="card" style={{ padding: 16, marginBottom: 16 }}>
         <div className="row">

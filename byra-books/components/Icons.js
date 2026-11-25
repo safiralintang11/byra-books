@@ -219,3 +219,48 @@ export const IconGift = (p) => (
     <path d="M12 6.5S10.5 3 8 3a2 2 0 0 0 0 4h4ZM12 6.5S13.5 3 16 3a2 2 0 0 1 0 4h-4Z" />
   </svg>
 );
+
+export const IconGrid = (p) => (
+  <svg {...base} {...p}>
+    <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+    <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+    <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+    <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+  </svg>
+);
+
+export const IconList = (p) => (
+  <svg {...base} {...p}>
+    <path d="M8 6h12M8 12h12M8 18h12" />
+    <circle cx="4" cy="6" r="1" fill="currentColor" stroke="none" />
+    <circle cx="4" cy="12" r="1" fill="currentColor" stroke="none" />
+    <circle cx="4" cy="18" r="1" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+export const IconTable = (p) => (
+  <svg {...base} {...p}>
+    <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+    <path d="M3.5 9.5h17M9 9.5v10M15 9.5v10" />
+  </svg>
+);
+
+export const IconLayout = (p) => (
+  <svg {...base} {...p}>
+    <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+    <path d="M3.5 10h17M10 10v9.5" />
+  </svg>
+);
+
+export const IconGlobe = (p) => (
+  <svg {...base} {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M3.5 12h17M12 3.5c2.4 2.3 3.6 5.2 3.6 8.5s-1.2 6.2-3.6 8.5c-2.4-2.3-3.6-5.2-3.6-8.5S9.6 5.8 12 3.5Z" />
+  </svg>
+);
+
+export const IconChevronUp = (p) => (
+  <svg {...base} {...p}>
+    <path d="m6 15 6-6 6 6" />
+  </svg>
+);

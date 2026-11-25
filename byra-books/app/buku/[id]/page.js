@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useCart } from '@/lib/cart';
 import { useSettings } from '@/lib/useSettings';
+import { useI18n } from '@/lib/i18n';
 import { rupiah, hargaAktif, tanggal, waLink } from '@/lib/format';
 import { Cover, Badges } from '@/components/BookCard';
 import BookCard from '@/components/BookCard';
@@ -18,6 +19,7 @@ export default function BukuDetail() {
   const { id } = useParams();
   const { add, wish, toggleWish } = useCart();
   const s = useSettings();
+  const { t, lang } = useI18n();
   const [b, setB] = useState(null);
   const [related, setRelated] = useState([]);
   const [qty, setQty] = useState(1);
@@ -45,14 +47,14 @@ export default function BukuDetail() {
       <div className="container section">
         <div className="empty-state">
           <div className="icon"><IconBox width={30} height={30} /></div>
-          <h3>Buku tidak ditemukan</h3>
-          <p className="muted">Mungkin judul ini sudah tidak tersedia.</p>
-          <Link href="/katalog" className="btn">Kembali ke katalog</Link>
+          <h3>{t('detail.notFound')}</h3>
+          <p className="muted">{t('detail.notFoundBody')}</p>
+          <Link href="/katalog" className="btn">{t('detail.back')}</Link>
         </div>
       </div>
     );
   }
-  if (!b) return <div className="container section"><p className="muted">Memuat…</p></div>;
+  if (!b) return <div className="container section"><p className="muted">{t('common.loading')}</p></div>;
 
   const po = b.status === 'preorder';
   const habis = !po && b.stock <= 0;
@@ -60,17 +62,25 @@ export default function BukuDetail() {
   const diskon = aktif < Number(b.price);
   const wished = wish.includes(b.id);
   const rows = [
-    ['Penulis', b.author], ['Penerbit', b.publisher], ['ISBN', b.isbn], ['Kategori', b.category],
-    ['Halaman', b.pages], ['Tahun terbit', b.year], ['Bahasa', b.language], ['Berat', b.weight_grams ? `${b.weight_grams} gram` : ''],
-    ['Varian', b.format], ['Asal', b.origin === 'impor' ? 'Impor' : 'Lokal'],
-    ['Stok', po ? 'Pre-Order' : b.stock], ['Penutupan PO', po && b.preorder_close ? tanggal(b.preorder_close) : ''],
+    [t('detail.author'), b.author],
+    [t('detail.publisher'), b.publisher],
+    [t('detail.isbn'), b.isbn],
+    [t('detail.category'), b.category],
+    [t('detail.pages'), b.pages],
+    [t('detail.year'), b.year],
+    [t('detail.language'), b.language],
+    [t('detail.weight'), b.weight_grams ? t('detail.gram', { n: b.weight_grams }) : ''],
+    [t('detail.format'), b.format],
+    [t('detail.origin'), b.origin === 'impor' ? t('detail.originImport') : t('detail.originLocal')],
+    [t('detail.stock'), po ? t('detail.preorder') : b.stock],
+    [t('detail.poClose'), po && b.preorder_close ? tanggal(b.preorder_close, lang) : ''],
   ].filter(([, v]) => v !== '' && v != null);
 
   return (
     <div className="container">
       <div className="crumbs">
-        <Link href="/">Beranda</Link><span>/</span>
-        <Link href="/katalog">Katalog</Link><span>/</span>
+        <Link href="/">{t('detail.home')}</Link><span>/</span>
+        <Link href="/katalog">{t('detail.catalog')}</Link><span>/</span>
         <span>{b.title}</span>
       </div>
 
@@ -83,7 +93,7 @@ export default function BukuDetail() {
           <Badges book={b} />
           <h1>{b.title}</h1>
           <div className="muted" style={{ fontWeight: 700 }}>
-            {b.author || 'Penulis tidak diketahui'}{b.publisher ? ` · ${b.publisher}` : ''}
+            {b.author || t('detail.authorUnknown')}{b.publisher ? ` · ${b.publisher}` : ''}
           </div>
 
           <div className="detail-price">
@@ -91,29 +101,33 @@ export default function BukuDetail() {
           </div>
           {diskon && (
             <span className="badge b-disc">
-              Hemat {rupiah(Number(b.price) - aktif)}
+              {t('detail.save', { amount: rupiah(Number(b.price) - aktif) })}
             </span>
           )}
 
           <div className="row" style={{ marginTop: 12, gap: 8 }}>
             {po ? (
-              <span className="status st-diproses">Pre-Order{b.preorder_close ? ` · tutup ${tanggal(b.preorder_close)}` : ''}</span>
+              <span className="status st-diproses">
+                {b.preorder_close ? t('detail.poUntil', { date: tanggal(b.preorder_close, lang) }) : t('detail.preorder')}
+              </span>
             ) : habis ? (
-              <span className="status st-dibatalkan">Stok habis</span>
+              <span className="status st-dibatalkan">{t('detail.stockOut')}</span>
             ) : (
-              <span className="status st-selesai">Ready stock{b.stock <= 3 ? ` · sisa ${b.stock}` : ''}</span>
+              <span className="status st-selesai">
+                {b.stock <= 3 ? t('detail.stockLeft', { count: b.stock }) : t('detail.stockReady')}
+              </span>
             )}
-            {b.origin === 'impor' && <span className="status st-dikirim">Buku impor</span>}
+            {b.origin === 'impor' && <span className="status st-dikirim">{t('detail.importBook')}</span>}
           </div>
 
           <div className="detail-actions">
             <div className="qty">
-              <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} aria-label="Kurangi jumlah"><IconMinus width={15} height={15} /></button>
+              <button type="button" onClick={() => setQty(Math.max(1, qty - 1))} aria-label={t('cart.minus')}><IconMinus width={15} height={15} /></button>
               <span>{qty}</span>
               <button
                 type="button"
                 onClick={() => setQty(po ? qty + 1 : Math.min(b.stock || 1, qty + 1))}
-                aria-label="Tambah jumlah"
+                aria-label={t('cart.plus')}
               >
                 <IconPlus width={15} height={15} />
               </button>
@@ -125,7 +139,7 @@ export default function BukuDetail() {
               onClick={() => { add(b, qty); setDone(true); }}
             >
               <IconCart width={17} height={17} />
-              {habis ? 'Stok Habis' : po ? 'Pre-Order Sekarang' : 'Tambah ke Keranjang'}
+              {habis ? t('detail.outBtn') : po ? t('detail.preorder') : t('detail.addCart')}
             </button>
             <button
               type="button"
@@ -134,20 +148,20 @@ export default function BukuDetail() {
               aria-pressed={wished}
             >
               <IconHeart width={17} height={17} fill={wished ? 'currentColor' : 'none'} />
-              {wished ? 'Di wishlist' : 'Wishlist'}
+              {wished ? t('detail.inWishlist') : t('detail.wishlist')}
             </button>
           </div>
 
           {done && (
             <div className="alert ok">
-              Ditambahkan ke keranjang. <Link href="/keranjang">Lihat keranjang →</Link>
+              {t('detail.added')} <Link href="/keranjang">{t('detail.viewCart')} →</Link>
             </div>
           )}
 
           <div className="row" style={{ marginBottom: 8 }}>
             {b.shopee_url && (
               <a className="btn btn-sky btn-sm" href={b.shopee_url} target="_blank" rel="noreferrer">
-                Checkout via Shopee
+                {t('detail.shopee')}
               </a>
             )}
             {s.wa_number && (
@@ -155,27 +169,27 @@ export default function BukuDetail() {
                 className="btn btn-ghost btn-sm"
                 target="_blank"
                 rel="noreferrer"
-                href={waLink(s.wa_number, `Halo, saya mau tanya buku "${b.title}"`)}
+                href={waLink(s.wa_number, `${t('wa.general')} "${b.title}"`)}
               >
-                <IconWhatsApp width={16} height={16} /> Tanya via WhatsApp
+                <IconWhatsApp width={16} height={16} /> {t('detail.askWa')}
               </a>
             )}
           </div>
 
           <div className="detail-trust">
-            <span className="trust-pill"><IconTruck width={15} height={15} /> Dikirim dari Indonesia</span>
-            <span className="trust-pill"><IconCheck width={15} height={15} /> Pesanan bisa dilacak</span>
-            <span className="trust-pill"><IconBox width={15} height={15} /> Dikemas aman</span>
+            <span className="trust-pill"><IconTruck width={15} height={15} /> {t('detail.trustShip')}</span>
+            <span className="trust-pill"><IconCheck width={15} height={15} /> {t('detail.trustTrack')}</span>
+            <span className="trust-pill"><IconBox width={15} height={15} /> {t('detail.trustPack')}</span>
           </div>
 
           {b.synopsis && (
             <>
-              <h3 style={{ marginTop: 28 }}>Sinopsis</h3>
+              <h3 style={{ marginTop: 28 }}>{t('detail.synopsis')}</h3>
               <p className="synopsis">{b.synopsis}</p>
             </>
           )}
 
-          <h3 style={{ marginTop: 24 }}>Detail buku</h3>
+          <h3 style={{ marginTop: 24 }}>{t('detail.info')}</h3>
           <ul className="info-list">
             {rows.map(([k, v]) => (
               <li key={k}><span>{k}</span><b>{v}</b></li>
@@ -183,7 +197,7 @@ export default function BukuDetail() {
           </ul>
 
           <Link href="/katalog" className="section-link" style={{ marginTop: 8 }}>
-            <IconArrowLeft width={16} height={16} /> Kembali ke katalog
+            <IconArrowLeft width={16} height={16} /> {t('detail.backCatalog')}
           </Link>
         </div>
       </div>
@@ -192,8 +206,8 @@ export default function BukuDetail() {
         <Reveal as="section" className="section">
           <div className="section-head">
             <div>
-              <h2>Kamu mungkin suka</h2>
-              <p className="sub">Masih dari kategori {b.category}.</p>
+              <h2>{t('detail.related')}</h2>
+              <p className="sub">{t('detail.relatedSub', { category: b.category })}</p>
             </div>
           </div>
           <div className="grid grid-books">
